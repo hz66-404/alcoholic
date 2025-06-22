@@ -6,6 +6,7 @@ import streamlit.components.v1 as components
 from streamlit_js_eval import streamlit_js_eval  # 用于获取星星评分
 from supabase import create_client, Client
 import uuid
+import io
 import os
 # ✅ Supabase 设置
 SUPABASE_URL = st.secrets["SUPABASE_URL"]
