@@ -1,0 +1,98 @@
+[
+  {
+    "wine_name": "1",
+    "year": 2020,
+    "origin": "1",
+    "price": 0.0,
+    "currency": "¥",
+    "store": "1",
+    "description": "1",
+    "image": "uploaded_images/20250622164310_IMG_5070.jpeg",
+    "created_at": "20250622164310",
+    "rating": 4
+  },
+  {
+    "wine_name": "test stars",
+    "year": 2020,
+    "origin": "11",
+    "price": 11.0,
+    "currency": "$",
+    "store": "11",
+    "description": "11",
+    "image": "uploaded_images/20250622163755_IMG_5168.jpeg",
+    "created_at": "20250622163755",
+    "rating": 4
+  },
+  {
+    "wine_name": "222",
+    "year": 2020,
+    "origin": "2",
+    "price": 2222.0,
+    "currency": "€",
+    "store": "22",
+    "description": "2",
+    "image": "uploaded_images/20250622163429_IMG_5193.jpeg",
+    "created_at": "20250622163429",
+    "rating": 4
+  },
+  {
+    "wine_name": "1",
+    "year": 2020,
+    "origin": "1",
+    "price": 111.0,
+    "currency": "$",
+    "store": "1",
+    "description": "1",
+    "image": "uploaded_images/20250622163313_IMG_5193.jpeg",
+    "created_at": "20250622163313",
+    "rating": 4
+  },
+  {
+    "wine_name": "11",
+    "year": 2020,
+    "origin": "1.1",
+    "price": 1.12,
+    "currency": "¥",
+    "store": "1",
+    "description": "1",
+    "image": "uploaded_images/20250622163043_IMG_5193.jpeg",
+    "created_at": "20250622163043",
+    "rating": 4
+  },
+  {
+    "wine_name": "111",
+    "year": 2020,
+    "origin": "1",
+    "price": 0.0,
+    "currency": "$",
+    "store": "11",
+    "description": "11",
+    "image": "uploaded_images/20250622162651_IMG_5168.jpeg",
+    "created_at": "20250622162651",
+    "rating": 5
+  },
+  {
+    "wine_name": "test stars",
+    "year": 2020,
+    "origin": "1",
+    "price": 0.0,
+    "currency": "€",
+    "store": "1",
+    "description": "11",
+    "image": "uploaded_images/20250622162434_IMG_5193.jpeg",
+    "created_at": "20250622162434",
+    "rating": 4
+  },
+  {
+    "wine_name": "test1",
+    "year": 2024,
+    "origin": "Spain Tenerife",
+    "price": 0.0,
+    "currency": "€",
+    "store": "Tenerife",
+    "description": " a little bit spicy",
+    "image": "uploaded_images/20250622162147_IMG_5193.jpeg",
+    "created_at": "20250622162147",
+    "rating": 5
+  }
+]
