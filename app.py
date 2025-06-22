@@ -238,16 +238,12 @@ wine_data = response.data if response.data else []
 if not wine_data:
     st.info(t["no_data"])
 else:
-    cols = st.columns(2)
+    cols = st.columns(3)
     for idx, item in enumerate(wine_data):
-        with cols[idx % 2]:
+        with cols[idx % 3]:
             # 加载 Supabase 图片
-            image_path = item.get("image")
-            image_url = f"{SUPABASE_URL}/storage/v1/object/public/{image_path}"
-            image_response = requests.get(image_url)
-            if image_response.status_code == 200:
-                img = load_image_with_correct_orientation(image_response.content)
-                st.image(img, use_container_width=True)
+            image_path = item["image"]
+            st.image(image_path, use_container_width=True)
 
             st.markdown(f"**{item['wine_name']}** ({item['year']})")
             currency = item.get("currency", "¥")
