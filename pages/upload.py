@@ -157,43 +157,51 @@ with st.form("upload_form", clear_on_submit=True):
     #         st.success(t["success"])
     #         home_url = f"/?lang={lang}"
     #         st.markdown(f"[🏠 {t['back_home']}]({home_url})", unsafe_allow_html=True)
-    photo: st.runtime.uploaded_file_manager.UploadedFile = st.file_uploader(t["photo"], type=["jpg","jpeg","png"])
+    photo = st.file_uploader(t["photo"], type=["jpg","jpeg","png"])
     submitted = st.form_submit_button(t["submit"])
 
     if submitted:
-        if not wine_name or not photo:
-            st.warning(t["warning"])
-        else:
-            # 构造唯一文件名
-            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-            filename = f"{timestamp}_{uuid.uuid4().hex}_{photo.name}"
-            storage_path = f"images/{filename}"
+        # … 参数校验 …
+        # 1. 生成 Supabase 存储的路径
+        timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        filename = f"{timestamp}_{uuid.uuid4().hex}_{photo.name}"
+        storage_path = f"images/{filename}"
 
-            # —— 关键改动：直接用 BytesIO 上传，无需本地写入 —— #
-            file_bytes = photo.read()                   # 读取全部二进制
-            file_io = io.BytesIO(file_bytes)            # 包装成文件流
-            # 可以显式带上 content-type，保证正确识别
-            supabase.storage.from_("image").upload(
-                storage_path,
-                file_io,
-                {"content-type": photo.type}
-            )
-            # 拿到公链地址
-            public_url = supabase.storage.from_("image").get_public_url(storage_path)
+        # 2. 从 UploadedFile 读取字节
+        file_bytes = photo.read()
 
-            # 然后按原来逻辑把记录写入数据库
-            entry = {
-                "wine_name": wine_name,
-                "year": int(year),
-                "origin": origin,
-                "price": float(price),
-                "currency": currency_symbol,
-                "store": store,
-                "description": description,
-                "image": public_url,
-                "created_at": datetime.utcnow().isoformat(),
-                "rating": rating_value
-            }
-            supabase.table("wine_data").insert(entry).execute()
-            st.success(t["success"])
-            st.markdown(f"[🏠 {t['back_home']}](?lang={lang})", unsafe_allow_html=True)
+        # 3. 写入临时文件
+        with tempfile.NamedTemporaryFile(suffix=os.path.splitext(photo.name)[1], delete=False) as tmp:
+            tmp.write(file_bytes)
+            tmp.flush()
+            tmp_path = tmp.name
+
+        # 4. 上传：使用本地临时文件路径
+        supabase.storage.from_("image").upload(storage_path, tmp_path)
+
+        # 5. 拿到公开 URL
+        public_url = supabase.storage.from_("image").get_public_url(storage_path)
+
+        # 6. 删除临时文件
+        try:
+            os.remove(tmp_path)
+        except OSError:
+            pass
+
+        # 7. 保存数据库记录
+        entry = {
+            "wine_name":      wine_name,
+            "year":           int(year),
+            "origin":         origin,
+            "price":          float(price),
+            "currency":       currency_symbol,
+            "store":          store,
+            "description":    description,
+            "image":          public_url,
+            "created_at":     datetime.utcnow().isoformat(),
+            "rating":         rating_value
+        }
+        supabase.table("wine_data").insert(entry).execute()
+
+        st.success(t["success"])
+        st.markdown(f"[🏠 {t['back_home']}](?lang={lang})", unsafe_allow_html=True)
