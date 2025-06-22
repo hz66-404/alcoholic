@@ -113,34 +113,74 @@ with st.form("upload_form", clear_on_submit=True):
 
     store = st.text_input(t["store"])
     description = st.text_area(t["description"], height=100)
-    photo = st.file_uploader(t["photo"], type=["jpg", "jpeg", "png"])
+
+    
+    # photo = st.file_uploader(t["photo"], type=["jpg", "jpeg", "png"])
+    # submitted = st.form_submit_button(t["submit"])
+
+    # if submitted:
+    #     if not wine_name or not photo:
+    #         st.warning(t["warning"])
+    #     else:
+    #         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    #         filename = f"{timestamp}_{uuid.uuid4().hex}_{photo.name}"
+    #         local_path = f"/tmp/{filename}"
+    #         with open(local_path, "wb") as f:
+    #             f.write(photo.getbuffer())      # 将 UploadedFile 写入临时文件
+
+    #         storage_path = filename
+    #         supabase.storage.from_("image").upload(storage_path, local_path)  # 用本地路径上传
+    #         public_url = supabase.storage.from_("image").get_public_url(storage_path)
+
+    #         # 清理临时文件
+    #         try:
+    #             os.remove(local_path)
+    #         except OSError:
+    #             pass
+
+    #         entry = {
+    #             "wine_name": wine_name,
+    #             "year": int(year),
+    #             "origin": origin,
+    #             "price": float(price),
+    #             "currency": currency_symbol,
+    #             "store": store,
+    #             "description": description,
+    #             "image": public_url,
+    #             "created_at": timestamp,
+    #             "rating": rating_value
+    #         }
+
+    #         supabase.table("wine_data").insert(entry).execute()
+
+    #         st.success(t["success"])
+    #         home_url = f"/?lang={lang}"
+    #         st.markdown(f"[🏠 {t['back_home']}]({home_url})", unsafe_allow_html=True)
+    photo: st.runtime.uploaded_file_manager.UploadedFile = st.file_uploader(t["photo"], type=["jpg","jpeg","png"])
     submitted = st.form_submit_button(t["submit"])
 
     if submitted:
         if not wine_name or not photo:
             st.warning(t["warning"])
         else:
+            # 构造唯一文件名
             timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
             filename = f"{timestamp}_{uuid.uuid4().hex}_{photo.name}"
-            # # 上传图片至 Supabase Storage
-            # image_path = f"images/{filename}"
-            # supabase.storage.from_("image").upload(image_path, photo)
-            # public_url = supabase.storage.from_("image").get_public_url(image_path)
-            # ✅ 上传图片至 Supabase Storage（先写入本地临时文件）
-            local_path = f"/tmp/{filename}"
-            with open(local_path, "wb") as f:
-                f.write(photo.getbuffer())      # 将 UploadedFile 写入临时文件
+            storage_path = f"images/{filename}"
 
-            storage_path = filename
-            supabase.storage.from_("image").upload(storage_path, local_path)  # 用本地路径上传
+            # —— 关键改动：直接用 BytesIO 上传，无需本地写入 —— #
+            file_bytes = photo.read()                   # 读取全部二进制
+            file_io = io.BytesIO(file_bytes)            # 包装成文件流
+            # 可以显式带上 content-type，保证正确识别
+            supabase.storage.from_("image").upload(
+                storage_path,
+                file_io,
+                {"content-type": photo.type}
+            )
+            # 拿到公链地址
             public_url = supabase.storage.from_("image").get_public_url(storage_path)
 
-            # 清理临时文件
-            try:
-                os.remove(local_path)
-            except OSError:
-                pass
-
+            # 然后按原来逻辑把记录写入数据库
             entry = {
                 "wine_name": wine_name,
                 "year": int(year),
@@ -150,12 +190,9 @@ with st.form("upload_form", clear_on_submit=True):
                 "store": store,
                 "description": description,
                 "image": public_url,
-                "created_at": timestamp,
+                "created_at": datetime.utcnow().isoformat(),
                 "rating": rating_value
             }
-
             supabase.table("wine_data").insert(entry).execute()
-
             st.success(t["success"])
-            home_url = f"/?lang={lang}"
-            st.markdown(f"[🏠 {t['back_home']}]({home_url})", unsafe_allow_html=True)
+            st.markdown(f"[🏠 {t['back_home']}](?lang={lang})", unsafe_allow_html=True)
